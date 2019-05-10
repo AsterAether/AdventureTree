@@ -3,9 +3,15 @@ package at.asteraether.adventuretree.editor;
 import at.asteraether.adventuretree.adventure.TextSpeed;
 import at.asteraether.adventuretree.adventure.state.Option;
 import at.asteraether.adventuretree.adventure.state.State;
+import at.asteraether.adventuretree.adventure.variable.Variable;
+import at.asteraether.adventuretree.adventure.variable.VariableType;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,9 +24,13 @@ public class StateDialog extends JDialog {
 
     private OptionListModel model;
     private State state;
+    private boolean accepted;
+    private State nextState;
 
-    public StateDialog(Window owner, State state) {
+    private StateDialog(Window owner, State state) {
         super(owner, "StateDialog");
+        this.state = state;
+        nextState = state.getNext();
         setModal(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(800, 700);
@@ -28,14 +38,27 @@ public class StateDialog extends JDialog {
         setLocationRelativeTo(owner);
     }
 
+    public static State openStateDialog(Window owner, State state) {
+        StateDialog dia = new StateDialog(owner, state);
+        dia.setVisible(true);
+        if (dia.accepted) {
+            return dia.state;
+        } else {
+            return state;
+        }
+    }
+
     private void initComponents() {
         Container c = getContentPane();
         c.setLayout(new BorderLayout());
 
         JPanel panel = new JPanel(new BorderLayout());
-        JTextArea textArea = new JTextArea();
+        JTextArea textArea = new JTextArea(state.getText());
+        textArea.setBorder(new TitledBorder(new LineBorder(Color.black), "Text"));
         textArea.setPreferredSize(new Dimension(0, 150));
         JComboBox<TextSpeed> comboBox = new JComboBox<>(new Vector<>(Arrays.asList(TextSpeed.values())));
+        comboBox.setBorder(new TitledBorder(new LineBorder(Color.black), "Textspeed"));
+        comboBox.setSelectedItem(state.getTextSpeed());
         panel.add(textArea, BorderLayout.CENTER);
 
         JPanel underPanel = new JPanel(new GridLayout(2, 1));
@@ -43,28 +66,48 @@ public class StateDialog extends JDialog {
 
         JPanel nextPanel = new JPanel(new GridLayout());
 
-        JCheckBox checkBox = new JCheckBox();
-        JButton nextState = new JButton("Next state");
-        nextState.addActionListener(e -> {
+        nextPanel.setBorder(new TitledBorder(new LineBorder(Color.black), "Next state"));
+
+        JCheckBox checkBox = new JCheckBox("Next state enabled");
+        checkBox.setSelected(state.getNext() != null);
+
+        JButton nextStateButton = new JButton("Next state");
+        nextStateButton.addActionListener(e -> {
             if (checkBox.isSelected()) {
-                new StateDialog(this, new State("test")).setVisible(true);
+                if (nextState == null) {
+                    nextState = new State("");
+                }
+                nextState = openStateDialog(this, nextState);
             }
         });
 
 
         nextPanel.add(checkBox, WEST);
-        nextPanel.add(nextState, CENTER);
+        nextPanel.add(nextStateButton, CENTER);
 
         underPanel.add(nextPanel);
 
         panel.add(underPanel, BorderLayout.SOUTH);
 
-        JList<Option> optionList = new JList<>(model = new OptionListModel());
+        JList<Option> optionList = new JList<>(model = new OptionListModel(state.getOptions()));
+
+        StateDialog outer = this;
+
+        optionList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2 && optionList.getSelectedValue() != null) {
+                    Option option = OptionDialog.openOptionDialog(outer, optionList.getSelectedValue());
+                    model.set(optionList.getSelectedIndex(), option);
+                }
+            }
+        });
 
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem addItem = new JMenuItem("Add option");
         addItem.addActionListener(e -> {
-            model.add(new Option("Test"));
+            String name = JOptionPane.showInputDialog("Input the title of the option");
+            model.add(new Option(name));
         });
 
         JMenuItem deleteItem = new JMenuItem("Delete option");
@@ -77,11 +120,25 @@ public class StateDialog extends JDialog {
         JButton cancel = new JButton("Cancel");
         cancel.addActionListener(e -> dispose());
         JButton save = new JButton("Save");
+        save.addActionListener(e -> {
+            accepted = true;
+            state.setTextSpeed((TextSpeed) comboBox.getSelectedItem());
+            state.setText(textArea.getText());
+            state.setOptions(model.optionList);
+            if (checkBox.isSelected()) {
+                state.setNext(nextState);
+            } else {
+                state.setNext(null);
+            }
+            dispose();
+        });
         buttonPanel.add(cancel);
         buttonPanel.add(save);
 
         c.add(panel, BorderLayout.NORTH);
-        c.add(optionList, BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(optionList);
+        scroll.setBorder(new TitledBorder(new LineBorder(Color.black), "Options"));
+        c.add(scroll, BorderLayout.CENTER);
         c.add(buttonPanel, BorderLayout.SOUTH);
     }
 
@@ -89,9 +146,18 @@ public class StateDialog extends JDialog {
 
         private List<Option> optionList = new ArrayList<>();
 
+        public OptionListModel(Option[] optionList) {
+            this.optionList.addAll(Arrays.asList(optionList));
+        }
+
         public void add(Option option) {
-            fireContentsChanged(this, 0, this.getSize());
             optionList.add(option);
+            fireContentsChanged(this, 0, this.getSize());
+        }
+
+        public void set(int index, Option option) {
+            optionList.set(index, option);
+            fireContentsChanged(this, 0, this.getSize());
         }
 
         @Override

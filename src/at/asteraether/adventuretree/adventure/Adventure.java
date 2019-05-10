@@ -11,16 +11,13 @@ import at.asteraether.adventuretree.exceptions.OutputException;
 import at.asteraether.adventuretree.exceptions.VariableNotFoundException;
 import at.asteraether.adventuretree.io.IOHandler;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 
-public class Adventure implements Serializable {
+public class Adventure implements Serializable, Closeable {
 
-    private final String name;
+    private String name;
     private State startState;
-    private transient final IOHandler ioHandler;
+    private transient IOHandler ioHandler;
     private final VariableManager varManager;
 
 
@@ -45,6 +42,26 @@ public class Adventure implements Serializable {
 
     public Adventure(String name, TextSpeed textSpeed) {
         this(name, null, textSpeed);
+    }
+
+    public State getStartState() {
+        return startState;
+    }
+
+    public IOHandler getIoHandler() {
+        return ioHandler;
+    }
+
+    public VariableManager getVarManager() {
+        return varManager;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setStartState(State startState) {
@@ -115,12 +132,6 @@ public class Adventure implements Serializable {
             throw new NoEndLeafException();
         }
         clearConsole();
-
-        try {
-            ioHandler.close();
-        } catch (IOException e) {
-            throw new OutputException();
-        }
     }
 
     public <T> T showPrompt(String header, String prompt, T[] options) throws OutputException, VariableNotFoundException {
@@ -164,4 +175,21 @@ public class Adventure implements Serializable {
     public String variablePass(String text) throws VariableNotFoundException {
         return varManager.variablePass(text);
     }
+
+    @Override
+    public void close() throws IOException {
+        ioHandler.close();
+    }
+
+    private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
+        aOutputStream.defaultWriteObject();
+        aOutputStream.writeObject(ioHandler.getTextSpeed());
+    }
+
+    private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException
+    {
+        aInputStream.defaultReadObject();
+        ioHandler = new IOHandler(System.out, System.in, (TextSpeed) aInputStream.readObject());
+    }
+
 }

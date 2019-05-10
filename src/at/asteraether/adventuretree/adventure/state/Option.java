@@ -45,4 +45,9 @@ public class Option implements Serializable {
     public OptionAction[] getActions() {
         return actions.toArray(new OptionAction[0]);
     }
+
+    @Override
+    public String toString() {
+        return title;
+    }
 }

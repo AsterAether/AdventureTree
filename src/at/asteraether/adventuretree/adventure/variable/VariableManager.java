@@ -3,6 +3,7 @@ package at.asteraether.adventuretree.adventure.variable;
 import at.asteraether.adventuretree.exceptions.VariableNotFoundException;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -40,6 +41,13 @@ public class VariableManager implements Serializable {
         variableMap.values().forEach(Variable::reset);
     }
 
+    public void clear() {
+        variableMap.clear();
+    }
+
+    public Collection<Variable> getVariables() {
+        return variableMap.values();
+    }
 
     public String variablePass(String text) throws VariableNotFoundException {
         Matcher matcher = VARIABLE_PATTERN.matcher(text);

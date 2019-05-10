@@ -37,6 +37,26 @@ public class Variable implements Serializable {
         this(name, type, null);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public void setType(VariableType type) {
+        this.type = type;
+    }
+
     public String getName() {
         return name;
     }

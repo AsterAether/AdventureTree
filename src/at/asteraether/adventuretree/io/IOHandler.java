@@ -19,14 +19,6 @@ public class IOHandler implements Closeable {
         this.textSpeed = textSpeed;
     }
 
-    public IOHandler(State start, TextSpeed textSpeed) {
-        this(System.out, System.in, textSpeed);
-    }
-
-    public IOHandler(State start) {
-        this(start, TextSpeed.NORMAL);
-    }
-
     public void setTextSpeed(TextSpeed textSpeed) {
         this.textSpeed = textSpeed;
     }

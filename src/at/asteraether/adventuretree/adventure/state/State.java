@@ -51,4 +51,17 @@ public class State implements Serializable {
     public State getNext() {
         return next;
     }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setTextSpeed(TextSpeed textSpeed) {
+        this.textSpeed = textSpeed;
+    }
+
+    public void setOptions(List<Option> options) {
+        this.options.clear();
+        this.options.addAll(options);
+    }
 }
