@@ -4,6 +4,7 @@ import at.asteraether.adventuretree.adventure.variable.action.OptionAction;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Option implements Serializable {
@@ -49,5 +50,10 @@ public class Option implements Serializable {
     @Override
     public String toString() {
         return title;
+    }
+
+    public void setActions(Collection<OptionAction> actions) {
+        this.actions.clear();
+        this.actions.addAll(actions);
     }
 }

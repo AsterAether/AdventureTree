@@ -25,4 +25,25 @@ public class SetAction implements OptionAction {
         Variable var = variableManager.getVariable(varName);
         var.setValue(value);
     }
+
+    @Override
+    public ActionType getActionType() {
+        return ActionType.SET;
+    }
+
+    public void setVarName(String varName) {
+        this.varName = varName;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "SetAction{" +
+                "varName='" + varName + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }

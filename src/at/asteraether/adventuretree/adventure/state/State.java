@@ -8,6 +8,8 @@ import java.util.List;
 
 public class State implements Serializable {
 
+    public static final int PREVIEW_SIZE = 10;
+
     private String text;
     private TextSpeed textSpeed;
     private final List<Option> options;
@@ -63,5 +65,13 @@ public class State implements Serializable {
     public void setOptions(List<Option> options) {
         this.options.clear();
         this.options.addAll(options);
+    }
+
+    @Override
+    public String toString() {
+        if (text.length() <= PREVIEW_SIZE) {
+            return text;
+        }
+        return text.substring(0, 10);
     }
 }

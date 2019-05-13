@@ -19,6 +19,8 @@ import java.util.List;
 
 public class AdventureEditor extends JFrame {
 
+    public static List<State> STATES = new LinkedList<>();
+
     private VariableListModel model;
     private State startState = new State("");
 
@@ -54,7 +56,10 @@ public class AdventureEditor extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         JButton button = new JButton("Start-State");
         button.addActionListener(e -> {
+            State old = startState;
             startState = StateDialog.openStateDialog(outer, startState);
+            STATES.remove(old);
+            STATES.add(startState);
         });
         button.setPreferredSize(new Dimension(0, 100));
 

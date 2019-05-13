@@ -1,5 +1,6 @@
 package at.asteraether.adventuretree.editor;
 
+import at.asteraether.adventuretree.adventure.Adventure;
 import at.asteraether.adventuretree.adventure.TextSpeed;
 import at.asteraether.adventuretree.adventure.state.Option;
 import at.asteraether.adventuretree.adventure.state.State;
@@ -61,8 +62,16 @@ public class StateDialog extends JDialog {
         comboBox.setSelectedItem(state.getTextSpeed());
         panel.add(textArea, BorderLayout.CENTER);
 
-        JPanel underPanel = new JPanel(new GridLayout(2, 1));
+        JPanel existing = new JPanel(new GridLayout(1, 2));
+        JComboBox<State> existingCombo = new JComboBox<>(new Vector<>(AdventureEditor.STATES));
+        JCheckBox existingCheck = new JCheckBox("Existing state?");
+        existing.add(existingCheck);
+        existing.add(existingCombo);
+
+        JPanel underPanel = new JPanel(new GridLayout(3, 1));
         underPanel.add(comboBox);
+
+        underPanel.add(existing);
 
         JPanel nextPanel = new JPanel(new GridLayout());
 
@@ -71,13 +80,18 @@ public class StateDialog extends JDialog {
         JCheckBox checkBox = new JCheckBox("Next state enabled");
         checkBox.setSelected(state.getNext() != null);
 
+        StateDialog outer = this;
+
         JButton nextStateButton = new JButton("Next state");
         nextStateButton.addActionListener(e -> {
             if (checkBox.isSelected()) {
                 if (nextState == null) {
                     nextState = new State("");
                 }
-                nextState = openStateDialog(this, nextState);
+                State old = nextState;
+                nextState = StateDialog.openStateDialog(outer, nextState);
+                AdventureEditor.STATES.remove(old);
+                AdventureEditor.STATES.add(nextState);
             }
         });
 
@@ -90,8 +104,6 @@ public class StateDialog extends JDialog {
         panel.add(underPanel, BorderLayout.SOUTH);
 
         JList<Option> optionList = new JList<>(model = new OptionListModel(state.getOptions()));
-
-        StateDialog outer = this;
 
         optionList.addMouseListener(new MouseAdapter() {
             @Override
@@ -127,6 +139,8 @@ public class StateDialog extends JDialog {
             state.setOptions(model.optionList);
             if (checkBox.isSelected()) {
                 state.setNext(nextState);
+            } else if(existingCheck.isSelected()) {
+                state.setNext((State) existingCombo.getSelectedItem());
             } else {
                 state.setNext(null);
             }

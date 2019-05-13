@@ -14,4 +14,9 @@ public class SubstractAction extends NumberAction {
     protected float performNumber(float var, float var2) {
         return var - var2;
     }
+
+    @Override
+    public ActionType getActionType() {
+        return ActionType.SUBSTRACT;
+    }
 }

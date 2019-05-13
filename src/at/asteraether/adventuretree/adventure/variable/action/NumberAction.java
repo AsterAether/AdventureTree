@@ -40,4 +40,9 @@ public abstract class NumberAction implements OptionAction {
     }
 
     protected abstract float performNumber(float var, float var2);
+
+    @Override
+    public ActionType getActionType() {
+        return ActionType.NUMBER;
+    }
 }

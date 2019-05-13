@@ -24,4 +24,8 @@ public interface OptionAction extends Serializable {
         }
         return true;
     }
+
+    default ActionType getActionType() {
+        return ActionType.OTHER;
+    }
 }
